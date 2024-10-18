@@ -15,8 +15,10 @@ app.use(express.json());
 app.use(cors());
 app.use(
   coockieSession({
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    keys: [process.env.COOKIE_KEY],
+    name: "session", // Name of the cookie
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+    keys: [process.env.COOKIE_KEY || "your-fallback-secret-key"], // Secret to sign cookies
+    httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
   })
 );
 app.use(passport.initialize());
