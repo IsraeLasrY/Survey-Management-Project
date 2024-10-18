@@ -16,7 +16,7 @@ app.use(cors());
 app.use(
   coockieSession({
     maxAge: 30 * 24 * 60 * 60 * 1000,
-    keys: [keys.cookieKey],
+    keys: [process.env.COOKIE_KEY],
   })
 );
 app.use(passport.initialize());
