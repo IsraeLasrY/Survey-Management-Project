@@ -13,13 +13,14 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(
+/*app.use(
   coockieSession({
     name: "session", // Name of the cookie
     maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
     keys: [process.env.COOKIE_KEY || "your-fallback-secret-key"], // Secret to sign cookies
   })
 );
+*/
 app.use(passport.initialize());
 app.use(passport.session());
 
