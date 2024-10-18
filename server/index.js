@@ -18,7 +18,6 @@ app.use(
     name: "session", // Name of the cookie
     maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
     keys: [process.env.COOKIE_KEY || "your-fallback-secret-key"], // Secret to sign cookies
-    httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
   })
 );
 app.use(passport.initialize());
