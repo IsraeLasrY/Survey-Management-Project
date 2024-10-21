@@ -38,6 +38,7 @@ app.use(passport.session());
 // Use authentication routes
 app.use(authRoutes);
 
+console.log("hi");
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
