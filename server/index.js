@@ -3,7 +3,7 @@ const express = require("express");
 const passport = require("passport");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const cookieSession = require("cookie-session");
+const cookieSession = require("express-session");
 require("dotenv").config();
 require("./models/User");
 require("./services/passport");
@@ -11,16 +11,19 @@ require("./services/passport");
 const app = express();
 
 // Middleware
-app.use(express.json());
-app.use(cors());
-/*app.use(
-  coockieSession({
-    name: "session", // Name of the cookie
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-    keys: [process.env.COOKIE_KEY || "your-fallback-secret-key"], // Secret to sign cookies
+app.use(
+  cookieSession({
+    secret: process.env.COOKIE_KEY, // Use COOKIE_KEY as the session secret
+    resave: false, // Prevents session from being saved back to the store if not modified
+    saveUninitialized: false, // Only saves session if something is stored
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+      secure: process.env.NODE_ENV === "production", // Only use HTTPS in production
+    },
   })
 );
-*/
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -32,11 +35,6 @@ mongoose
   })
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error));
-
-// Define Routes
-app.get("/api", (req, res) => {
-  res.send({ message: "Hello from the backend!" });
-});
 
 // Start the Server
 require("./routes/authRoutes")(app);

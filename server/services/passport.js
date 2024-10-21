@@ -2,6 +2,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const mongoose = require("mongoose");
 const User = mongoose.model("users");
+require("dotenv").config();
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
