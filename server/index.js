@@ -1,16 +1,23 @@
-// index.js
 const express = require("express");
-const passport = require("passport");
 const mongoose = require("mongoose");
-const cors = require("cors");
+const passport = require("passport");
 const cookieSession = require("express-session");
-require("dotenv").config();
-require("./models/User");
-require("./services/passport");
+
+// Load environment variables from the appropriate .env file
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
+require("dotenv").config({ path: envFile });
+
+require("./models/User"); // Load User model
+require("./services/passport"); // Initialize Passport
+
+const authRoutes = require("./routes/authRoutes"); // Import auth routes
 
 const app = express();
 
-// Middleware
+// Use cookie-session middleware
 app.use(
   cookieSession({
     secret: process.env.COOKIE_KEY, // Use COOKIE_KEY as the session secret
@@ -24,8 +31,12 @@ app.use(
   })
 );
 
+// Initialize Passport and session management
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Use authentication routes
+app.use(authRoutes);
 
 // Connect to MongoDB
 mongoose
@@ -34,11 +45,10 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => console.log("Connected to MongoDB"))
-  .catch((error) => console.error("MongoDB connection error:", error));
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-// Start the Server
-require("./routes/authRoutes")(app);
+// Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () =>
+  console.log(`Server running on http://localhost:${PORT}`)
+);

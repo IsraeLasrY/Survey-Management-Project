@@ -1,20 +1,24 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const mongoose = require("mongoose");
-const User = mongoose.model("users");
-require("dotenv").config();
+const User = require("../models/User"); // Import the User model
 
+// Serialize user into session (stores user ID in session)
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user.id); // `user.id` is the MongoDB ID of the user
 });
 
-passport.deserializeUser((id, done) => {
-  User.findById(id).then((user) => {
+// Deserialize user from session (retrieves user by ID)
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id); // Look up user by ID
     done(null, user);
-  });
+  } catch (err) {
+    done(err, null);
+  }
 });
 
-//function when we want to use authentication with google we use it and sand the clientID and clientSecet to they know this is the spacific person
+// Configure Google OAuth strategy
 passport.use(
   new GoogleStrategy(
     {
@@ -23,18 +27,27 @@ passport.use(
       callbackURL: "/auth/google/callback",
       proxy: true,
     },
-    (accessToken, refreshToken, profile, done) => {
-      User.findOne({ googleId: profile.id }).then((existingUser) => {
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // Check if the user already exists in the database
+        let existingUser = await User.findOne({ googleId: profile.id });
+
         if (existingUser) {
-          //we have this user we don't need to create a new one
-          done(null, existingUser);
-        } else {
-          //we don't have a record with this ID, make new record
-          new User({ googleId: profile.id })
-            .save()
-            .then((user) => done(null, user));
+          // User found, return the user
+          return done(null, existingUser);
         }
-      });
+
+        // Create a new user if not found
+        const newUser = await new User({
+          googleId: profile.id,
+          name: profile.displayName,
+          email: profile.emails[0].value,
+        }).save();
+
+        done(null, newUser);
+      } catch (err) {
+        done(err, null);
+      }
     }
   )
 );
